@@ -8,6 +8,12 @@ function shapeAnd(x,y,size){
 	context.lineTo(x,y+size*2);
 	context.closePath();
 	context.stroke();
+	allShapes.push({
+		"fn":shapeAnd,
+		"x":x,
+		"y":y,
+		"size":size
+	})
 }
 function shapeOr(x,y,size){
 	context.strokeStyle="#666";
@@ -17,6 +23,12 @@ function shapeOr(x,y,size){
 	context.quadraticCurveTo(x+size*3,y+size,x,y+size*2);
 	context.quadraticCurveTo(x+size,y+size,x,y);
 	context.stroke();
+	allShapes.push({
+		"fn":shapeOr,
+		"x":x,
+		"y":y,
+		"size":size
+	})
 }
 function shapeNot(x,y,size){
 	context.strokeStyle="#666";
@@ -29,4 +41,10 @@ function shapeNot(x,y,size){
 	context.moveTo(x+size*1.5,y+size)
 	context.arc(x+size*1.5+4,y+size,4,Math.PI,Math.PI*4,false);
 	context.stroke();
+	allShapes.push({
+		"fn":shapeNot,
+		"x":x,
+		"y":y,
+		"size":size
+	})
 }

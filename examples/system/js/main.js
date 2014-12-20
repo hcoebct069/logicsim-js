@@ -9,10 +9,15 @@ window.onload=function(){
 	hei = w.innerHeight|| e.clientHeight|| g.clientHeight;
 
 	/*window.onresize=function(e){
+		w = window;
+		d = document;
+		e = d.documentElement;
+		g = d.getElementsByTagName('body')[0];
 		wid = w.innerWidth || e.clientWidth || g.clientWidth,
 		hei = w.innerHeight|| e.clientHeight|| g.clientHeight;
 		canvas.setAttribute("width",wid);
 		canvas.setAttribute("height",hei-head_h);
+		redraw();
 	}*/
 
 	var header = document.getElementsByTagName('header')[0];
@@ -26,7 +31,7 @@ window.onload=function(){
 	ws.style.height = (hei-head_h)+"px";
 
 	canvas.style.left=(wid-canvas.offsetWidth)/2+"px";
-	canvas.style.top=(hei-canvas.offsetHeight-head_h)/2+"px";
+	canvas.style.top=(hei-canvas.offsetHeight-head_h)/2-1+"px";
 
 	var scroll = 0;
 	document.addEventListener("mousewheel", function(e){
@@ -104,4 +109,14 @@ window.onload=function(){
 	shapeAnd(50,50,40);
 	shapeOr(250,50,40);
 	shapeNot(450,50,40);
+}
+var allShapes = [];
+function redraw(){
+	context.clearRect ( 0 , 0 , canvas.width, canvas.height );
+	for(i in allShapes){
+		vx=allShapes[i].x;
+		vy=allShapes[i].y;
+		vs=allShapes[i].size;
+		allShapes[i].fn(vx,vy,vs);
+	}
 }

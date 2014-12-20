@@ -38,12 +38,11 @@ header .toolbar ul li {
 	padding: 10px;
 }
 #workspace{
+	position: relative;
 	overflow: hidden;
 }
 canvas{
-	position: relative;
-	top:20px;
-	left: 20px;
+	position: absolute;
 	background: #fff;
 	border: 1px solid #ccc;
 	box-shadow: 0 0 3px rgba(0,0,0,0);
