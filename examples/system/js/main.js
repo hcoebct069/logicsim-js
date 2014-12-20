@@ -55,8 +55,34 @@ window.onload=function(){
 		}
 	})
 	var dragging = false;
-	canvas.onmousedown = function(e){
-		console.log(e)
+	var dragElem = null;
+
+	document.body.onmousedown = function(e){
+		obj = e.target || e.srcElement;
+		if(obj.className.indexOf("draggable")!=-1) {
+			dragElem = obj;
+			dragEvent(e)
+		}
+	}
+
+	document.onmousemove=function(e){
+		if(dragging){
+			dragElem.style.position="absolute";
+			if(e.clientX){
+				dragElem.style.left=(initX+e.clientX-dragX)+"px";
+				dragElem.style.top=(initY+e.clientY-dragY/*-head_h*/)+"px";
+			}else{
+				dragElem.style.left=(initX+e.x-dragX)+"px";
+				dragElem.style.top=(initY+e.y-dragY/*-head_h*/)+"px";
+			}
+		}
+	}
+	document.onmouseup=function(){
+		dragging = false;
+		dragElem = null;
+	}
+
+	function dragEvent(e){
 		dragging = true;
 		if(e.clientX){
 			dragX=e.clientX;
@@ -65,22 +91,7 @@ window.onload=function(){
 			dragX=e.x;
 			dragY=e.y;
 		}
-		initX=canvas.offsetLeft;
-		initY=canvas.offsetTop;
-	}
-
-	document.onmousemove=function(e){
-		if(dragging){
-			if(e.clientX){
-				canvas.style.left=(initX+e.clientX-dragX)+"px";
-				canvas.style.top=(initY+e.clientY-dragY-head_h)+"px";
-			}else{
-				canvas.style.left=(initX+e.x-dragX)+"px";
-				canvas.style.top=(initY+e.y-dragY-head_h)+"px";
-			}
-		}
-	}
-	document.onmouseup=function(){
-		dragging=false;
+		initX=dragElem.offsetLeft;
+		initY=dragElem.offsetTop;
 	}
 }
