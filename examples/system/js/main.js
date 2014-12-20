@@ -1,3 +1,5 @@
+canvas = document.getElementById("canvas");
+context = canvas.getContext("2d");
 window.onload=function(){
 	var w = window,
 	d = document,
@@ -6,20 +8,18 @@ window.onload=function(){
 	wid = w.innerWidth || e.clientWidth || g.clientWidth,
 	hei = w.innerHeight|| e.clientHeight|| g.clientHeight;
 
-	window.onresize=function(e){
+	/*window.onresize=function(e){
 		wid = w.innerWidth || e.clientWidth || g.clientWidth,
 		hei = w.innerHeight|| e.clientHeight|| g.clientHeight;
-		canvas.style.width = (wid)+"px";
-		canvas.style.height = (hei-head_h)+"px";
-	}
+		canvas.setAttribute("width",wid);
+		canvas.setAttribute("height",hei-head_h);
+	}*/
 
 	var header = document.getElementsByTagName('header')[0];
 	var head_h=header.offsetHeight;
 
-	var canvas = document.getElementById("canvas");
-	var context = canvas.getContext("2d");
-	canvas.style.width = (wid)+"px";
-	canvas.style.height = (hei-head_h)+"px";
+	canvas.setAttribute("width",wid);
+	canvas.setAttribute("height",hei-head_h);
 
 	var ws = document.getElementById("workspace");
 	ws.style.width = wid+"px";
@@ -101,4 +101,7 @@ window.onload=function(){
 		initX=dragElem.offsetLeft;
 		initY=dragElem.offsetTop;
 	}
+	shapeAnd(50,50,40);
+	shapeOr(250,50,40);
+	shapeNot(450,50,40);
 }
