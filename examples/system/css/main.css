@@ -14,7 +14,7 @@ body{
 	width: 100%;
 	height: 100%;
 	overflow: hidden;
-	background: #d6d6d6;
+	background: #ddd;
 }
 header{
 	z-index: 10;
@@ -28,7 +28,7 @@ header .title {
 }
 header .toolbar {
 	background: #efefef;
-	border-bottom: 1px solid #ddd;
+	border-bottom: 1px solid #ccc;
 }
 header .toolbar ul {
 	display: block;
@@ -45,8 +45,8 @@ canvas{
 	top:20px;
 	left: 20px;
 	background: #fff;
-	border:1px solid #ddd;
-	box-shadow: 0 0 3px rgba(0,0,0,0.8);
+	border: 1px solid #ccc;
+	box-shadow: 0 0 3px rgba(0,0,0,0);
 	transition:transform .2s ease-in-out;
 	z-index: 9;
 }
