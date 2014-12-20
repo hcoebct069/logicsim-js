@@ -6,13 +6,20 @@ window.onload=function(){
 	wid = w.innerWidth || e.clientWidth || g.clientWidth,
 	hei = w.innerHeight|| e.clientHeight|| g.clientHeight;
 
+	window.onresize=function(e){
+		wid = w.innerWidth || e.clientWidth || g.clientWidth,
+		hei = w.innerHeight|| e.clientHeight|| g.clientHeight;
+		canvas.style.width = (wid)+"px";
+		canvas.style.height = (hei-head_h)+"px";
+	}
+
 	var header = document.getElementsByTagName('header')[0];
 	var head_h=header.offsetHeight;
 
 	var canvas = document.getElementById("canvas");
 	var context = canvas.getContext("2d");
 	canvas.style.width = (wid)+"px";
-	canvas.style.height = (hei-head_h)+"px";;
+	canvas.style.height = (hei-head_h)+"px";
 
 	var ws = document.getElementById("workspace");
 	ws.style.width = wid+"px";
