@@ -30,7 +30,7 @@ var doProcess = function (object, inputs, time, delay) {
         throw new Exceptions.OutputLengthErrorException("Output cannot be more"+
           "than one!"
         );
-      }hthttps://stackoverflow.com/questions/10729276/node-js-console-log-object-contenthttps://stackoverflow.com/questions/10729276/node-js-console-log-object-contenttps://stackoverflow.com/questions/10729276/node-js-console-log-object-content
+      }
       variables[currVal.output[0]] = basicOperations[currVal.instance](
         helpers.mapArrayToArrayUsingObj(currVal.inputs, variables));
     } else {
@@ -40,6 +40,7 @@ var doProcess = function (object, inputs, time, delay) {
   });
   return variables;
 }
+
 
 var objTest = {
   name:'name',
