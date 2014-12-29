@@ -1,50 +1,32 @@
-function shapeAnd(x,y,size){
-	context.strokeStyle="#666";
-	context.beginPath();
-	context.translate(0.5,0.5);
-	context.moveTo(x,y);
-	context.lineTo(x+size,y);
-	context.arc(x+size,y+size,size,-Math.PI/2,Math.PI/2,false);
-	context.lineTo(x,y+size*2);
-	context.closePath();
-	context.stroke();
-	allShapes.push({
-		"fn":shapeAnd,
-		"x":x,
-		"y":y,
-		"size":size
-	})
+function shapeAnd(id,size){
+	if(size===undefined) size=50;
+	var path="M0,0L50,0A50,50 0 0,1 50,100L0,100Z";
+	var andShape = new fabric.Path(path);
+	canvas.add(andShape);
+	andShape.set({fill:"#fff",stroke:"#666",id:id,width:100,height:100})
+	//andShape.set({left:x,top:y})
+	canvas.setActiveObject(andShape);
+	canvas.renderAll();
+	return andShape;
 }
-function shapeOr(x,y,size){
-	context.strokeStyle="#666";
-	context.beginPath();
-	context.translate(0.5,0.5);
-	context.moveTo(x,y);
-	context.quadraticCurveTo(x+size*3,y+size,x,y+size*2);
-	context.quadraticCurveTo(x+size,y+size,x,y);
-	context.stroke();
-	allShapes.push({
-		"fn":shapeOr,
-		"x":x,
-		"y":y,
-		"size":size
-	})
+function shapeOr(id,size){
+	if(size===undefined) size=50;
+	var path="M0,0Q150,50,0,100M0,0Q50,50,0,100";
+	var orShape = new fabric.Path(path);
+	canvas.add(orShape);
+	orShape.set({fill:"#fff",stroke:"#666",id:id,width:100,height:100})
+	//orShape.set({left:x,top:y})
+	canvas.renderAll();
+	return orShape;
 }
-function shapeNot(x,y,size){
-	context.strokeStyle="#666";
-	context.beginPath();
-	context.translate(0.5,0.5);
-	context.moveTo(x,y);
-	context.lineTo(x+size*1.5,y+size);
-	context.lineTo(x,y+size*2);
-	context.closePath();
-	context.moveTo(x+size*1.5,y+size)
-	context.arc(x+size*1.5+4,y+size,4,Math.PI,Math.PI*4,false);
-	context.stroke();
-	allShapes.push({
-		"fn":shapeNot,
-		"x":x,
-		"y":y,
-		"size":size
-	})
+function shapeNot(id,size){
+	if(size===undefined) size=50;
+	var path="M0,0L75,50L0,100ZM75,50C75,43,85,43,85,50M75,50C75,57,85,57,85,50M75,50C75,43,85,43,85,50M75,50C75,57,85,57,85,50";
+	var notShape = new fabric.Path(path);
+	canvas.add(notShape);
+	notShape.set({fill:"#fff",stroke:"#666",id:id,width:100,height:100})
+	//notShape.set({left:x,top:y})
+	canvas.renderAll();
+	return notShape;
 }
+
