@@ -1,4 +1,4 @@
-@import url(http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700);
+/*@import url(http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700);*/
 * {
 	margin: 0;
 	padding: 0;
@@ -14,7 +14,7 @@ body{
 	width: 100%;
 	height: 100%;
 	overflow: hidden;
-	background: #d6d6d6;
+	background: #ddd;
 }
 header{
 	z-index: 10;
@@ -28,7 +28,7 @@ header .title {
 }
 header .toolbar {
 	background: #efefef;
-	border-bottom: 1px solid #ddd;
+	border-bottom: 1px solid #ccc;
 }
 header .toolbar ul {
 	display: block;
@@ -38,15 +38,14 @@ header .toolbar ul li {
 	padding: 10px;
 }
 #workspace{
+	position: relative;
 	overflow: hidden;
 }
-canvas{
-	position: relative;
-	top:20px;
-	left: 20px;
+/*canvas{
+	position: absolute;
 	background: #fff;
-	border:1px solid #ddd;
-	box-shadow: 0 0 3px rgba(0,0,0,0.8);
+	border: 1px solid #ccc;
+	box-shadow: 0 0 3px rgba(0,0,0,0);
 	transition:transform .2s ease-in-out;
 	z-index: 9;
-}
+}*/
