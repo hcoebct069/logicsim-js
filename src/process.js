@@ -1,6 +1,7 @@
 var basicOperations = require('./basic_op.js');
 var Exceptions = require('./exceptions.js');
 var helpers = require('./helpers.js');
+//Debug
 var util = require('util');
 
 //A Function that processes(or simulates) an module with given inputs
@@ -17,7 +18,7 @@ var doProcess = function (object, inputs, time, delay) {
     object.outputs,
     object.wires
   ]);
-  console.log(util.inspect(variables, false, null));
+  console.log(util.inspect(variables, false, null)); //Debug
 
   //Assign Inputs
   for (var i = inputs.length - 1; i >= 0; i--) {
@@ -35,22 +36,19 @@ var doProcess = function (object, inputs, time, delay) {
         helpers.mapArrayToArrayUsingObj(currVal.inputs, variables));
     } else {
       //Operations are not basic:
-      //Might need recursion.
+      //Might need recursion
+      //STEPS:
+      //Load the instances using loader
+      //Pass the object returned by loader to this function.
+      //Map to appropriate input/output/wires  
     }
   });
   return variables;
 }
 
 
-var objTest = {
-  name:'name',
-  inputs:['a', 'b', 'c'],
-  outputs:['y'],
-  wires:['w1','w2'],
-  operations : [{instance:'basic_and', type: 'basic', inputs:['a', 'b'], output:['w1']},
-  {instance:'basic_or',type:'basic', inputs:['w1','c'], output:['w2']},
-  {instance:'basic_not', type:'basic', inputs:['w2'], output:['y']}]
-};
 
-var objOut = doProcess(objTest, [true, true, true]);
-console.log(util.inspect(objOut, false, null));
+
+module.exports.doProcess = doProcess;
+module.exports.helpers = helpers;
+module.exports.util = util;

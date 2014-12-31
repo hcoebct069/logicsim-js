@@ -26,5 +26,14 @@ var mapArrayToArrayUsingObj = function (arrayOfKeys, objectToUse) {
   return returnArr;
 }
 
+var changeZerosToFalse = function(arr){
+  return arr.map(function(prevVal, curVal, idx, ar){
+    return prevVal == 0 ?
+      false:
+      true;
+  });
+}
+
 module.exports.mapMultipleArrayToObj = mapMultipleArrayToObj;
 module.exports.mapArrayToArrayUsingObj = mapArrayToArrayUsingObj;
+module.exports.changeZerosToFalse = changeZerosToFalse;
