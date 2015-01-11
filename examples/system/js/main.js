@@ -1,3 +1,7 @@
+aNum=0;
+oNum=0;
+nNum=0;
+mainShapes={};
 canvas = new fabric.Canvas("canvas");
 window.onload=function(){
 	var w = window,
