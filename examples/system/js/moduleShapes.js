@@ -11,8 +11,10 @@ function shapeAnd(id,x,y,size){
 		top:y,left:x,
 		hasControls:false,
 		scaleX:size/50,
-		scaleY:size/50
+		scaleY:size/50,
+		dataType:"shape"
 	})
+	if(waitingForLine) andShape.selectable=false;
 	canvas.add(andShape);
 	canvas.renderAll();
 	canvas.setActiveObject(andShape);
@@ -31,8 +33,10 @@ function shapeOr(id,x,y,size){
 		top:y,left:x,
 		hasControls:false,
 		scaleX:size/50,
-		scaleY:size/50
+		scaleY:size/50,
+		dataType:"shape"
 	})
+	if(waitingForLine) orShape.selectable=false;
 	canvas.add(orShape);
 	canvas.renderAll();
 	canvas.setActiveObject(orShape);
@@ -51,8 +55,10 @@ function shapeNot(id,x,y,size){
 		top:y,left:x,
 		hasControls:false,
 		scaleX:size/50,
-		scaleY:size/50
+		scaleY:size/50,
+		dataType:"shape"
 	})
+	if(waitingForLine) notShape.selectable=false;
 	canvas.add(notShape);
 	canvas.renderAll();
 	canvas.setActiveObject(notShape);

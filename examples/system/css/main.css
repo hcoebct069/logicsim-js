@@ -58,3 +58,8 @@ header .toolbar ul li:hover {
 	transition:transform .2s ease-in-out;
 	z-index: 9;
 }*/
+.menu-selected{
+    background: #ddd!important;
+    border-right:1px solid #ccc!important;
+    border-left:1px solid #ccc!important;
+}
