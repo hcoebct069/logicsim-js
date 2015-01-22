@@ -43,6 +43,7 @@ iCreate.onclick = function() {
 	inp.set({
 		id: "ip_" + iNum
 	});
+	if(waitingForLine) inp.selectable = false;
 	mainInputs["ip_" + iNum] = {shape:inp};
 	iNum++;
 	canvas.add(inp);
@@ -58,7 +59,7 @@ lCreate.onclick = function() {
 	}else{
 		waitingForLine = false;
 		canvas.forEachObject(function(o) {
-			o.selectable = true;
+			if(o.dataType!="line") o.selectable = true;
 			o.set({"stroke":"#666","strokeWidth":1});
 		});
 		closeArea.set({"stroke":"#fff"});
