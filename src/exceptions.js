@@ -10,6 +10,10 @@ var Exceptions = {
   VariableNotFoundException: function (message) {
     this.VariableNotFoundException.message = message;
     this.VariableNotFoundException.type = "VariableNotFoundException";
+  },
+  ModulesNotAvailableException: function (message) {
+    this.ModulesNotAvailableException.message = message;
+    this.ModulesNotAvailableException.type = "ModulesNotAvailableException";
   }
 
 };
