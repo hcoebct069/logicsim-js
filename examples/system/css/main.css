@@ -1,45 +1,54 @@
 /*@import url(http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700);*/
+
 * {
-	margin: 0;
-	padding: 0;
-	font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;
-	cursor: default;
-	-webkit-user-select: none;
-	-moz-user-select: none;
-	-ms-user-select: none;
-	-o-user-select: none;
-	user-select: none;
-} 
-body{
-	width: 100%;
-	height: 100%;
-	overflow: hidden;
-	background: #ddd;
+    margin: 0;
+    padding: 0;
+    font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;
+    cursor: default;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
 }
-header{
-	z-index: 10;
+body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #ddd;
+}
+header {
+    z-index: 10;
 }
 header .title {
-	background: #49c;
-	border-bottom: 1px solid #48b;
-	padding: 10px;
-	color: #fff;
-	font-size: 18px;
+    background: #49c;
+    border-bottom: 1px solid #48b;
+    padding: 10px;
+    color: #fff;
+    font-size: 18px;
 }
 header .toolbar {
-	background: #efefef;
-	border-bottom: 1px solid #ccc;
+    background: #efefef;
+    border-bottom: 1px solid #ccc;
 }
 header .toolbar ul {
-	display: block;
+    display: block;
 }
 header .toolbar ul li {
-	display: inline-block;
-	padding: 10px;
+    display: inline-block;
+    padding: 10px;
+    cursor: pointer;
+    border-right:1px solid transparent;
+    border-left:1px solid transparent;
 }
-#workspace{
-	position: relative;
-	overflow: hidden;
+header .toolbar ul li:hover {
+	background: #ddd;
+    border-right:1px solid #ccc;
+    border-left:1px solid #ccc;
+} 
+#workspace {
+    position: relative;
+    overflow: hidden;
 }
 /*canvas{
 	position: absolute;
@@ -49,3 +58,8 @@ header .toolbar ul li {
 	transition:transform .2s ease-in-out;
 	z-index: 9;
 }*/
+.menu-selected{
+    background: #ddd!important;
+    border-right:1px solid #ccc!important;
+    border-left:1px solid #ccc!important;
+}
