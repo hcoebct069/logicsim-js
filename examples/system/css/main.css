@@ -63,3 +63,6 @@ header .toolbar ul li:hover {
     border-right:1px solid #ccc!important;
     border-left:1px solid #ccc!important;
 }
+#cClear{
+    float: right;
+}
