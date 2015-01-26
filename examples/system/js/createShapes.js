@@ -38,6 +38,7 @@ iCreate.onclick = function() {
         hasControls: false,
         transparentCorners: false,
         padding: 5,
+        shapeType:"input",
         type: "number",
         dataType: "input",
         linesIn: 0,
