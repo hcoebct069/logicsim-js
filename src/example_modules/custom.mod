@@ -29,6 +29,7 @@
       "instance": "adder",
       "type": "non-basic",
       "inputs": [
+        "A",
         "B",
         "w1"
       ],

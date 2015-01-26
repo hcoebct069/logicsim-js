@@ -60,14 +60,14 @@ module.exports = Exceptions;
 },{}],3:[function(require,module,exports){
 var util = require('util');
 var Exceptions = require('./exceptions.js')
-  
+
 var mapMultipleArrayToObj = function (arrayOfArrays, defaultValue) {
   console.log (util.inspect (arrayOfArrays,false,null) );
   var returnObj = {};
   for (key_outer in arrayOfArrays) {
     var array = arrayOfArrays[key_outer];
     for (key_inner in array) {
-      returnObj[array[key_inner]] = defaultValue || false; 
+      returnObj[array[key_inner]] = defaultValue || false;
     }
   }
   return returnObj;
@@ -129,9 +129,9 @@ var helpers = require('./helpers.js');
 var util = require('util');
 
 //A Function that processes(or simulates) an module with given inputs
-//for given time 
+//for given time
 var doProcess = function (object, inputs, time, delay) {
-  //TODO: Check if object is good. 
+  //TODO: Check if object is good.
   console.log(
     'Starting Parse :: Module: ' + object.name + ' with ' +
     object.inputs.length + ' inputs and ' + object.operations.length +
@@ -164,7 +164,7 @@ var doProcess = function (object, inputs, time, delay) {
       //STEPS:
       //Load the instances using loader
       //Pass the object returned by loader to this function.
-      //Map to appropriate input/output/wires  
+      //Map to appropriate input/output/wires
     }
   });
   return variables;

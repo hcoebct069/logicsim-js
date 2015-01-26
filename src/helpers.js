@@ -2,7 +2,7 @@ var util = require('util');
 var Exceptions = require('./exceptions.js')
 
 var mapMultipleArrayToObj = function (arrayOfArrays, defaultValue) {
-  console.log (util.inspect (arrayOfArrays,false,null) );
+  //console.log (util.inspect (arrayOfArrays,false,null) );
   var returnObj = {};
   for (key_outer in arrayOfArrays) {
     var array = arrayOfArrays[key_outer];

@@ -37,7 +37,27 @@ console.log(process.util.inspect(a, false, null));
 var objOut = process.doProcess(objTest, [true, true, true]);
 console.log(process.util.inspect(objOut, false, null)); //Debug*/
 
-var data = loader.load("custom");
+/*var data = loader.load("custom");
 var objOut = process.doProcess(data, [true, true, true]);
 console.log("++++++++++++++++++++++++++++++++++++++++++");
 console.log(process.util.inspect(objOut, false, null)); //Debug
+module.exports = process;*/
+
+var data = loader.load("custom", function (err, data) {
+  if (err){
+    console.log("Oops! Erro!");
+    console.log(data);
+  } else {
+    //do stuffs
+    process.doProcess(data, [true, false, true], function(error, output){
+      //output contains output of the module
+      //wires contain the value of all wires in the module --> Hold it now
+      if (error === true) {
+        console.log("Oops! Error!");
+        console.log(output);
+      } else {
+        console.log(output);
+      }
+    })
+  }
+});

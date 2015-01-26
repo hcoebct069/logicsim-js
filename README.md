@@ -7,4 +7,14 @@ Doing as Computer Graphics Minor Project.
 
 Authors
 ===
-See [[authors.md]]
+1. Nootan Ghimire
+2. Nishan Bajracharya
+
+Building
+====
+
+###Backend
+
+Go to `src/` Details are in `src/README.md`
+
+ 

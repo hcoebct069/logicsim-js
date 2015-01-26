@@ -1,4 +1,4 @@
-require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+!function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.LogicSim=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 var exceptions = require('./exceptions.js')
 
 var basic_and = function (input) {
@@ -39,7 +39,12 @@ module.exports.basic_and = basic_and;
 module.exports.basic_or  = basic_or;
 module.exports.basic_not = basic_not;
 module.exports.basic_xor = basic_xor;
-},{"./exceptions.js":2}],2:[function(require,module,exports){
+},{"./exceptions.js":3}],2:[function(require,module,exports){
+//var fs = require('browserify-fs');
+module.exports.loader = require('./loader');
+module.exports.process = require('./process.js');
+
+},{"./loader":5,"./process.js":113}],3:[function(require,module,exports){
 var Exceptions = {
   InputLengthErrorException: function (message){
     this.InputLengthErrorException.message = message;
@@ -61,12 +66,12 @@ var Exceptions = {
 };
 
 module.exports = Exceptions;
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 var util = require('util');
 var Exceptions = require('./exceptions.js')
 
 var mapMultipleArrayToObj = function (arrayOfArrays, defaultValue) {
-  console.log (util.inspect (arrayOfArrays,false,null) );
+  //console.log (util.inspect (arrayOfArrays,false,null) );
   var returnObj = {};
   for (key_outer in arrayOfArrays) {
     var array = arrayOfArrays[key_outer];
@@ -136,33 +141,37 @@ module.exports.mapMultipleArrayToObj = mapMultipleArrayToObj;
 module.exports.mapArrayToArrayUsingObj = mapArrayToArrayUsingObj;
 module.exports.changeZerosToFalse = changeZerosToFalse;
 module.exports.tryParseJSON = tryParseJSON;
-},{"./exceptions.js":2,"util":138}],4:[function(require,module,exports){
+},{"./exceptions.js":3,"util":138}],5:[function(require,module,exports){
 //loader.js -- loads external module
 
 
-var fs = require('fs');
+var fs = require('browserify-fs');
 var helpers = require('./helpers.js');
 
 var defaultPath = "./example_modules/";
 
-var load = function(moduleName, optionalModuleRootPath) {
+var load = function(moduleName, callback, optionalModuleRootPath) {
+  // var isComplete = false;
+  // var jsonData = false;
   optionalModuleRootPath = optionalModuleRootPath || defaultPath;
- /* fs.readFile(optionalModuleRootPath + moduleName + '.mod',
+  fs.readFile(optionalModuleRootPath + moduleName + '.mod',
     'utf-8',
     function (err, data) {
-      console.log(data);
+      //console.log(data);
       var json;
       if ((json = helpers.tryParseJSON(data)) === false) {
         //Fallback
-        callback("Cannot Parse", false)
+        //callback("Cannot Parse", false)
+        callback(true, "Cannot Load");
       } else {
         callback(false, json); //Callback with json_data
+        //jsonData = json;
+        //isComplete = true;
       }
-    });*/
+    });
 
-  var data = fs.readFileSync(optionalModuleRootPath + moduleName +
-    '.mod').toString();
-      return helpers.tryParseJSON(data);
+    // var data = fs.readFileSync(optionalModuleRootPath + moduleName +
+    // '.mod').toString();
 };
 
 /*
@@ -171,51 +180,15 @@ load("adder", function (data) {
 });*/
 
 module.exports.load = load;
-},{"./helpers.js":3,"fs":113}],5:[function(require,module,exports){
-var process = require('./process.js');
-var loader = require('./loader.js');
-//TEST STARTS HERE
+module.exports.fs = fs;
+},{"./helpers.js":4,"browserify-fs":6}],6:[function(require,module,exports){
+var leveljs = require('level-js');
+var levelup = require('levelup');
+var fs = require('level-filesystem');
 
-/*var newObj = {
-  name:"custom1",
-  inputs:['a','b'],
-  outputs:['y'],
-  wires:['w1']
-  operations:[{instance:'basic_not', type:'basic', inputs:['a'], outputs:['w1']},
-  {instance:'custom1', type:'not_basic',inputs:['a','b','w1'], outputs:['y']}]
-};
-
-
-var objTest = {
-  name:'custom1',
-  inputs:['a', 'b', 'c'],
-  outputs:['y'],
-  wires:['w1','w2'],
-  operations : [{instance:'basic_and', type: 'basic', inputs:['a', 'b'], outputs:['w1']},
-  {instance:'basic_or',type:'basic', inputs:['w1','c'], outputs:['w2']},
-  {instance:'basic_not', type:'basic', inputs:['w2'], outputs:['y']}]
-};
-
-
-// loader.load("adder", function(object){
-//   console.log(object);
-// });
-
-var a = [[1,1,0],[0,0,1], [1,0,0]];
-for (var i = a.length - 1; i >= 0; i--) {
-  a[i] = process.helpers.changeZerosToFalse(a[i]);
-};
-
-console.log("Check: ")
-console.log(process.util.inspect(a, false, null));
-var objOut = process.doProcess(objTest, [true, true, true]);
-console.log(process.util.inspect(objOut, false, null)); //Debug*/
-
-var data = loader.load("custom");
-var objOut = process.doProcess(data, [true, true, true]);
-console.log("++++++++++++++++++++++++++++++++++++++++++");
-console.log(process.util.inspect(objOut, false, null)); //Debug
-},{"./loader.js":4,"./process.js":112}],6:[function(require,module,exports){
+var db = levelup('level-filesystem', {db:leveljs});
+module.exports = fs(db);
+},{"level-filesystem":8,"level-js":71,"levelup":89}],7:[function(require,module,exports){
 var errno = require('errno');
 
 Object.keys(errno.code).forEach(function(code) {
@@ -229,7 +202,7 @@ Object.keys(errno.code).forEach(function(code) {
 		return err;
 	};
 });
-},{"errno":21}],7:[function(require,module,exports){
+},{"errno":22}],8:[function(require,module,exports){
 (function (process,Buffer){
 var fwd = require('fwd-stream');
 var sublevel = require('level-sublevel');
@@ -828,7 +801,7 @@ module.exports = function(db, opts) {
 	return fs;
 };
 }).call(this,require('_process'),require("buffer").Buffer)
-},{"./errno":6,"./paths":67,"./watchers":69,"_process":123,"buffer":115,"fwd-stream":23,"level-blobs":36,"level-peek":48,"level-sublevel":51,"once":64}],8:[function(require,module,exports){
+},{"./errno":7,"./paths":68,"./watchers":70,"_process":123,"buffer":115,"fwd-stream":24,"level-blobs":37,"level-peek":49,"level-sublevel":52,"once":65}],9:[function(require,module,exports){
 (function (Buffer){
 var Writable = require('readable-stream').Writable
 var inherits = require('inherits')
@@ -964,7 +937,7 @@ function u8Concat (parts) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":115,"inherits":9,"readable-stream":18,"typedarray":19}],9:[function(require,module,exports){
+},{"buffer":115,"inherits":10,"readable-stream":19,"typedarray":20}],10:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -989,7 +962,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -1082,7 +1055,7 @@ function forEach (xs, f) {
 }
 
 }).call(this,require('_process'))
-},{"./_stream_readable":12,"./_stream_writable":14,"_process":123,"core-util-is":15,"inherits":9}],11:[function(require,module,exports){
+},{"./_stream_readable":13,"./_stream_writable":15,"_process":123,"core-util-is":16,"inherits":10}],12:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -1130,7 +1103,7 @@ PassThrough.prototype._transform = function(chunk, encoding, cb) {
   cb(null, chunk);
 };
 
-},{"./_stream_transform":13,"core-util-is":15,"inherits":9}],12:[function(require,module,exports){
+},{"./_stream_transform":14,"core-util-is":16,"inherits":10}],13:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -2085,7 +2058,7 @@ function indexOf (xs, x) {
 }
 
 }).call(this,require('_process'))
-},{"./_stream_duplex":10,"_process":123,"buffer":115,"core-util-is":15,"events":119,"inherits":9,"isarray":16,"stream":135,"string_decoder/":17,"util":114}],13:[function(require,module,exports){
+},{"./_stream_duplex":11,"_process":123,"buffer":115,"core-util-is":16,"events":119,"inherits":10,"isarray":17,"stream":135,"string_decoder/":18,"util":114}],14:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -2296,7 +2269,7 @@ function done(stream, er) {
   return stream.push(null);
 }
 
-},{"./_stream_duplex":10,"core-util-is":15,"inherits":9}],14:[function(require,module,exports){
+},{"./_stream_duplex":11,"core-util-is":16,"inherits":10}],15:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -2777,7 +2750,7 @@ function endWritable(stream, state, cb) {
 }
 
 }).call(this,require('_process'))
-},{"./_stream_duplex":10,"_process":123,"buffer":115,"core-util-is":15,"inherits":9,"stream":135}],15:[function(require,module,exports){
+},{"./_stream_duplex":11,"_process":123,"buffer":115,"core-util-is":16,"inherits":10,"stream":135}],16:[function(require,module,exports){
 (function (Buffer){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -2887,12 +2860,12 @@ function objectToString(o) {
   return Object.prototype.toString.call(o);
 }
 }).call(this,require("buffer").Buffer)
-},{"buffer":115}],16:[function(require,module,exports){
+},{"buffer":115}],17:[function(require,module,exports){
 module.exports = Array.isArray || function (arr) {
   return Object.prototype.toString.call(arr) == '[object Array]';
 };
 
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -3115,7 +3088,7 @@ function base64DetectIncompleteChar(buffer) {
   this.charLength = this.charReceived ? 3 : 0;
 }
 
-},{"buffer":115}],18:[function(require,module,exports){
+},{"buffer":115}],19:[function(require,module,exports){
 exports = module.exports = require('./lib/_stream_readable.js');
 exports.Stream = require('stream');
 exports.Readable = exports;
@@ -3124,7 +3097,7 @@ exports.Duplex = require('./lib/_stream_duplex.js');
 exports.Transform = require('./lib/_stream_transform.js');
 exports.PassThrough = require('./lib/_stream_passthrough.js');
 
-},{"./lib/_stream_duplex.js":10,"./lib/_stream_passthrough.js":11,"./lib/_stream_readable.js":12,"./lib/_stream_transform.js":13,"./lib/_stream_writable.js":14,"stream":135}],19:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":11,"./lib/_stream_passthrough.js":12,"./lib/_stream_readable.js":13,"./lib/_stream_transform.js":14,"./lib/_stream_writable.js":15,"stream":135}],20:[function(require,module,exports){
 var undefined = (void 0); // Paranoia
 
 // Beyond this value, index getters/setters (i.e. array[0], array[1]) are so slow to
@@ -3756,7 +3729,7 @@ function packF32(v) { return packIEEE754(v, 8, 23); }
 
 }());
 
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 var prr = require('prr')
 
 function init (type, message, cause) {
@@ -3813,7 +3786,7 @@ module.exports = function (errno) {
   }
 }
 
-},{"prr":22}],21:[function(require,module,exports){
+},{"prr":23}],22:[function(require,module,exports){
 var all = module.exports.all = [
  {
   "errno": -1,
@@ -4241,7 +4214,7 @@ module.exports.code = {
 
 module.exports.custom = require("./custom")(module.exports)
 module.exports.create = module.exports.custom.createError
-},{"./custom":20}],22:[function(require,module,exports){
+},{"./custom":21}],23:[function(require,module,exports){
 /*!
   * prr
   * (c) 2013 Rod Vagg <rod@vagg.org>
@@ -4305,7 +4278,7 @@ module.exports.create = module.exports.custom.createError
 
   return prr
 })
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 (function (process,Buffer){
 var Writable = require('readable-stream/writable');
 var Readable = require('readable-stream/readable');
@@ -4467,14 +4440,14 @@ exports.duplex = function(opts, initWritable, initReadable) {
 	return dupl;
 };
 }).call(this,require('_process'),require("buffer").Buffer)
-},{"_process":123,"buffer":115,"readable-stream/duplex":24,"readable-stream/readable":34,"readable-stream/writable":35}],24:[function(require,module,exports){
+},{"_process":123,"buffer":115,"readable-stream/duplex":25,"readable-stream/readable":35,"readable-stream/writable":36}],25:[function(require,module,exports){
 module.exports = require("./lib/_stream_duplex.js")
 
-},{"./lib/_stream_duplex.js":25}],25:[function(require,module,exports){
-arguments[4][10][0].apply(exports,arguments)
-},{"./_stream_readable":27,"./_stream_writable":29,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/readable-stream/lib/_stream_duplex.js":10,"_process":123,"core-util-is":30,"inherits":31}],26:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":26}],26:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"./_stream_transform":28,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/readable-stream/lib/_stream_passthrough.js":11,"core-util-is":30,"inherits":31}],27:[function(require,module,exports){
+},{"./_stream_readable":28,"./_stream_writable":30,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/readable-stream/lib/_stream_duplex.js":11,"_process":123,"core-util-is":31,"inherits":32}],27:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"./_stream_transform":29,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/readable-stream/lib/_stream_passthrough.js":12,"core-util-is":31,"inherits":32}],28:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -5460,7 +5433,7 @@ function indexOf (xs, x) {
 }
 
 }).call(this,require('_process'))
-},{"_process":123,"buffer":115,"core-util-is":30,"events":119,"inherits":31,"isarray":32,"stream":135,"string_decoder/":33}],28:[function(require,module,exports){
+},{"_process":123,"buffer":115,"core-util-is":31,"events":119,"inherits":32,"isarray":33,"stream":135,"string_decoder/":34}],29:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -5672,7 +5645,7 @@ function done(stream, er) {
   return stream.push(null);
 }
 
-},{"./_stream_duplex":25,"core-util-is":30,"inherits":31}],29:[function(require,module,exports){
+},{"./_stream_duplex":26,"core-util-is":31,"inherits":32}],30:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -6062,15 +6035,15 @@ function endWritable(stream, state, cb) {
 }
 
 }).call(this,require('_process'))
-},{"./_stream_duplex":25,"_process":123,"buffer":115,"core-util-is":30,"inherits":31,"stream":135}],30:[function(require,module,exports){
-module.exports=require(15)
-},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/readable-stream/node_modules/core-util-is/lib/util.js":15,"buffer":115}],31:[function(require,module,exports){
-module.exports=require(9)
-},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/inherits/inherits_browser.js":9}],32:[function(require,module,exports){
+},{"./_stream_duplex":26,"_process":123,"buffer":115,"core-util-is":31,"inherits":32,"stream":135}],31:[function(require,module,exports){
 module.exports=require(16)
-},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/readable-stream/node_modules/isarray/index.js":16}],33:[function(require,module,exports){
+},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/readable-stream/node_modules/core-util-is/lib/util.js":16,"buffer":115}],32:[function(require,module,exports){
+module.exports=require(10)
+},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/inherits/inherits_browser.js":10}],33:[function(require,module,exports){
 module.exports=require(17)
-},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/readable-stream/node_modules/string_decoder/index.js":17,"buffer":115}],34:[function(require,module,exports){
+},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/readable-stream/node_modules/isarray/index.js":17}],34:[function(require,module,exports){
+module.exports=require(18)
+},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/readable-stream/node_modules/string_decoder/index.js":18,"buffer":115}],35:[function(require,module,exports){
 var Stream = require('stream'); // hack to fix a circular dependency issue when used with browserify
 exports = module.exports = require('./lib/_stream_readable.js');
 exports.Stream = Stream;
@@ -6080,10 +6053,10 @@ exports.Duplex = require('./lib/_stream_duplex.js');
 exports.Transform = require('./lib/_stream_transform.js');
 exports.PassThrough = require('./lib/_stream_passthrough.js');
 
-},{"./lib/_stream_duplex.js":25,"./lib/_stream_passthrough.js":26,"./lib/_stream_readable.js":27,"./lib/_stream_transform.js":28,"./lib/_stream_writable.js":29,"stream":135}],35:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":26,"./lib/_stream_passthrough.js":27,"./lib/_stream_readable.js":28,"./lib/_stream_transform.js":29,"./lib/_stream_writable.js":30,"stream":135}],36:[function(require,module,exports){
 module.exports = require("./lib/_stream_writable.js")
 
-},{"./lib/_stream_writable.js":29}],36:[function(require,module,exports){
+},{"./lib/_stream_writable.js":30}],37:[function(require,module,exports){
 (function (process,Buffer){
 var Writable = require('readable-stream/writable');
 var Readable = require('readable-stream/readable');
@@ -6478,29 +6451,29 @@ module.exports = function(db, opts) {
 	return blobs;
 };
 }).call(this,require('_process'),require("buffer").Buffer)
-},{"_process":123,"buffer":115,"level-peek":48,"once":64,"readable-stream/readable":46,"readable-stream/writable":47,"util":138}],37:[function(require,module,exports){
-arguments[4][10][0].apply(exports,arguments)
-},{"./_stream_readable":39,"./_stream_writable":41,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/readable-stream/lib/_stream_duplex.js":10,"_process":123,"core-util-is":42,"inherits":43}],38:[function(require,module,exports){
+},{"_process":123,"buffer":115,"level-peek":49,"once":65,"readable-stream/readable":47,"readable-stream/writable":48,"util":138}],38:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"./_stream_transform":40,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/readable-stream/lib/_stream_passthrough.js":11,"core-util-is":42,"inherits":43}],39:[function(require,module,exports){
-module.exports=require(27)
-},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/fwd-stream/node_modules/readable-stream/lib/_stream_readable.js":27,"_process":123,"buffer":115,"core-util-is":42,"events":119,"inherits":43,"isarray":44,"stream":135,"string_decoder/":45}],40:[function(require,module,exports){
+},{"./_stream_readable":40,"./_stream_writable":42,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/readable-stream/lib/_stream_duplex.js":11,"_process":123,"core-util-is":43,"inherits":44}],39:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"./_stream_transform":41,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/readable-stream/lib/_stream_passthrough.js":12,"core-util-is":43,"inherits":44}],40:[function(require,module,exports){
 module.exports=require(28)
-},{"./_stream_duplex":37,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/fwd-stream/node_modules/readable-stream/lib/_stream_transform.js":28,"core-util-is":42,"inherits":43}],41:[function(require,module,exports){
+},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/fwd-stream/node_modules/readable-stream/lib/_stream_readable.js":28,"_process":123,"buffer":115,"core-util-is":43,"events":119,"inherits":44,"isarray":45,"stream":135,"string_decoder/":46}],41:[function(require,module,exports){
 module.exports=require(29)
-},{"./_stream_duplex":37,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/fwd-stream/node_modules/readable-stream/lib/_stream_writable.js":29,"_process":123,"buffer":115,"core-util-is":42,"inherits":43,"stream":135}],42:[function(require,module,exports){
-module.exports=require(15)
-},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/readable-stream/node_modules/core-util-is/lib/util.js":15,"buffer":115}],43:[function(require,module,exports){
-module.exports=require(9)
-},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/inherits/inherits_browser.js":9}],44:[function(require,module,exports){
+},{"./_stream_duplex":38,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/fwd-stream/node_modules/readable-stream/lib/_stream_transform.js":29,"core-util-is":43,"inherits":44}],42:[function(require,module,exports){
+module.exports=require(30)
+},{"./_stream_duplex":38,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/fwd-stream/node_modules/readable-stream/lib/_stream_writable.js":30,"_process":123,"buffer":115,"core-util-is":43,"inherits":44,"stream":135}],43:[function(require,module,exports){
 module.exports=require(16)
-},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/readable-stream/node_modules/isarray/index.js":16}],45:[function(require,module,exports){
+},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/readable-stream/node_modules/core-util-is/lib/util.js":16,"buffer":115}],44:[function(require,module,exports){
+module.exports=require(10)
+},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/inherits/inherits_browser.js":10}],45:[function(require,module,exports){
 module.exports=require(17)
-},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/readable-stream/node_modules/string_decoder/index.js":17,"buffer":115}],46:[function(require,module,exports){
-module.exports=require(34)
-},{"./lib/_stream_duplex.js":37,"./lib/_stream_passthrough.js":38,"./lib/_stream_readable.js":39,"./lib/_stream_transform.js":40,"./lib/_stream_writable.js":41,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/fwd-stream/node_modules/readable-stream/readable.js":34,"stream":135}],47:[function(require,module,exports){
+},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/readable-stream/node_modules/isarray/index.js":17}],46:[function(require,module,exports){
+module.exports=require(18)
+},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/readable-stream/node_modules/string_decoder/index.js":18,"buffer":115}],47:[function(require,module,exports){
 module.exports=require(35)
-},{"./lib/_stream_writable.js":41,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/fwd-stream/node_modules/readable-stream/writable.js":35}],48:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":38,"./lib/_stream_passthrough.js":39,"./lib/_stream_readable.js":40,"./lib/_stream_transform.js":41,"./lib/_stream_writable.js":42,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/fwd-stream/node_modules/readable-stream/readable.js":35,"stream":135}],48:[function(require,module,exports){
+module.exports=require(36)
+},{"./lib/_stream_writable.js":42,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/fwd-stream/node_modules/readable-stream/writable.js":36}],49:[function(require,module,exports){
 var fixRange = require('level-fix-range')
 //get the first/last record in a range
 
@@ -6577,7 +6550,7 @@ function last (db, opts, cb) {
 }
 
 
-},{"level-fix-range":49}],49:[function(require,module,exports){
+},{"level-fix-range":50}],50:[function(require,module,exports){
 
 module.exports = 
 function fixRange(opts) {
@@ -6597,7 +6570,7 @@ function fixRange(opts) {
 }
 
 
-},{}],50:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 function addOperation (type, key, value, options) {
   var operation = {
     type: type,
@@ -6637,7 +6610,7 @@ B.write = function (cb) {
 
 module.exports = Batch
 
-},{}],51:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 (function (process){
 var EventEmitter = require('events').EventEmitter
 var next         = process.nextTick
@@ -6731,7 +6704,7 @@ module.exports   = function (_db, options) {
 
 
 }).call(this,require('_process'))
-},{"./batch":50,"./sub":62,"_process":123,"events":119,"level-fix-range":52,"level-hooks":54}],52:[function(require,module,exports){
+},{"./batch":51,"./sub":63,"_process":123,"events":119,"level-fix-range":53,"level-hooks":55}],53:[function(require,module,exports){
 var clone = require('clone')
 
 module.exports = 
@@ -6757,7 +6730,7 @@ function fixRange(opts) {
   return opts
 }
 
-},{"clone":53}],53:[function(require,module,exports){
+},{"clone":54}],54:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -6905,7 +6878,7 @@ clone.clonePrototype = function(parent) {
 };
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":115}],54:[function(require,module,exports){
+},{"buffer":115}],55:[function(require,module,exports){
 var ranges = require('string-range')
 
 module.exports = function (db) {
@@ -7075,7 +7048,7 @@ module.exports = function (db) {
   }
 }
 
-},{"string-range":55}],55:[function(require,module,exports){
+},{"string-range":56}],56:[function(require,module,exports){
 
 //force to a valid range
 var range = exports.range = function (obj) {
@@ -7149,7 +7122,7 @@ var satifies = exports.satisfies = function (key, range) {
 
 
 
-},{}],56:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 module.exports = hasKeys
 
 function hasKeys(source) {
@@ -7158,7 +7131,7 @@ function hasKeys(source) {
         typeof source === "function")
 }
 
-},{}],57:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 var Keys = require("object-keys")
 var hasKeys = require("./has-keys")
 
@@ -7185,11 +7158,11 @@ function extend() {
     return target
 }
 
-},{"./has-keys":56,"object-keys":58}],58:[function(require,module,exports){
+},{"./has-keys":57,"object-keys":59}],59:[function(require,module,exports){
 module.exports = Object.keys || require('./shim');
 
 
-},{"./shim":61}],59:[function(require,module,exports){
+},{"./shim":62}],60:[function(require,module,exports){
 
 var hasOwn = Object.prototype.hasOwnProperty;
 var toString = Object.prototype.toString;
@@ -7213,7 +7186,7 @@ module.exports = function forEach (obj, fn, ctx) {
 };
 
 
-},{}],60:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 
 /**!
  * is
@@ -7917,7 +7890,7 @@ is.string = function (value) {
 };
 
 
-},{}],61:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 (function () {
 	"use strict";
 
@@ -7963,7 +7936,7 @@ is.string = function (value) {
 }());
 
 
-},{"foreach":59,"is":60}],62:[function(require,module,exports){
+},{"foreach":60,"is":61}],63:[function(require,module,exports){
 var EventEmitter = require('events').EventEmitter
 var inherits     = require('util').inherits
 var ranges       = require('string-range')
@@ -8242,7 +8215,7 @@ SDB.post = function (range, hook) {
 var exports = module.exports = SubDB
 
 
-},{"./batch":50,"events":119,"level-fix-range":52,"string-range":55,"util":138,"xtend":57}],63:[function(require,module,exports){
+},{"./batch":51,"events":119,"level-fix-range":53,"string-range":56,"util":138,"xtend":58}],64:[function(require,module,exports){
 // Returns a wrapper function that returns a wrapped callback
 // The wrapper function should do some stuff, and return a
 // presumably different callback function.
@@ -8277,7 +8250,7 @@ function wrappy (fn, cb) {
   }
 }
 
-},{}],64:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
 var wrappy = require('wrappy')
 module.exports = wrappy(once)
 
@@ -8300,9 +8273,9 @@ function once (fn) {
   return f
 }
 
-},{"wrappy":63}],65:[function(require,module,exports){
-module.exports=require(56)
-},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/level-sublevel/node_modules/xtend/has-keys.js":56}],66:[function(require,module,exports){
+},{"wrappy":64}],66:[function(require,module,exports){
+module.exports=require(57)
+},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/level-sublevel/node_modules/xtend/has-keys.js":57}],67:[function(require,module,exports){
 var hasKeys = require("./has-keys")
 
 module.exports = extend
@@ -8327,7 +8300,7 @@ function extend() {
     return target
 }
 
-},{"./has-keys":65}],67:[function(require,module,exports){
+},{"./has-keys":66}],68:[function(require,module,exports){
 (function (process){
 var path = require('path');
 var once = require('once');
@@ -8445,7 +8418,7 @@ module.exports = function(db) {
 	return that;
 };
 }).call(this,require('_process'))
-},{"./errno":6,"./stat":68,"_process":123,"concat-stream":8,"once":64,"path":122,"xtend":66}],68:[function(require,module,exports){
+},{"./errno":7,"./stat":69,"_process":123,"concat-stream":9,"once":65,"path":122,"xtend":67}],69:[function(require,module,exports){
 var toDate = function(date) {
 	if (!date) return new Date();
 	if (typeof date === 'string') return new Date(date);
@@ -8497,7 +8470,7 @@ Stat.prototype.isSocket = function() {
 module.exports = function(opts) {
 	return new Stat(opts);
 };
-},{}],69:[function(require,module,exports){
+},{}],70:[function(require,module,exports){
 var events = require('events');
 
 module.exports = function() {
@@ -8550,7 +8523,7 @@ module.exports = function() {
 
 	return that;
 };
-},{"events":119}],70:[function(require,module,exports){
+},{"events":119}],71:[function(require,module,exports){
 (function (Buffer){
 module.exports = Level
 
@@ -8724,7 +8697,7 @@ var checkKeyValue = Level.prototype._checkKeyValue = function (obj, type) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"./iterator":71,"abstract-leveldown":74,"buffer":115,"idb-wrapper":76,"isbuffer":77,"typedarray-to-buffer":79,"util":138,"xtend":81}],71:[function(require,module,exports){
+},{"./iterator":72,"abstract-leveldown":75,"buffer":115,"idb-wrapper":77,"isbuffer":78,"typedarray-to-buffer":80,"util":138,"xtend":82}],72:[function(require,module,exports){
 var util = require('util')
 var AbstractIterator  = require('abstract-leveldown').AbstractIterator
 var ltgt = require('ltgt')
@@ -8791,7 +8764,7 @@ Iterator.prototype._next = function (callback) {
   this.callback = callback
 }
 
-},{"abstract-leveldown":74,"ltgt":78,"util":138}],72:[function(require,module,exports){
+},{"abstract-leveldown":75,"ltgt":79,"util":138}],73:[function(require,module,exports){
 (function (process){
 /* Copyright (c) 2013 Rod Vagg, MIT License */
 
@@ -8875,7 +8848,7 @@ AbstractChainedBatch.prototype.write = function (options, callback) {
 
 module.exports = AbstractChainedBatch
 }).call(this,require('_process'))
-},{"_process":123}],73:[function(require,module,exports){
+},{"_process":123}],74:[function(require,module,exports){
 (function (process){
 /* Copyright (c) 2013 Rod Vagg, MIT License */
 
@@ -8928,7 +8901,7 @@ AbstractIterator.prototype.end = function (callback) {
 module.exports = AbstractIterator
 
 }).call(this,require('_process'))
-},{"_process":123}],74:[function(require,module,exports){
+},{"_process":123}],75:[function(require,module,exports){
 (function (process,Buffer){
 /* Copyright (c) 2013 Rod Vagg, MIT License */
 
@@ -9188,7 +9161,7 @@ module.exports.AbstractIterator     = AbstractIterator
 module.exports.AbstractChainedBatch = AbstractChainedBatch
 
 }).call(this,require('_process'),require("buffer").Buffer)
-},{"./abstract-chained-batch":72,"./abstract-iterator":73,"_process":123,"buffer":115,"xtend":75}],75:[function(require,module,exports){
+},{"./abstract-chained-batch":73,"./abstract-iterator":74,"_process":123,"buffer":115,"xtend":76}],76:[function(require,module,exports){
 module.exports = extend
 
 function extend() {
@@ -9207,7 +9180,7 @@ function extend() {
     return target
 }
 
-},{}],76:[function(require,module,exports){
+},{}],77:[function(require,module,exports){
 /*global window:false, self:false, define:false, module:false */
 
 /**
@@ -9323,7 +9296,8 @@ function extend() {
 
     onStoreReady && (this.onStoreReady = onStoreReady);
 
-    var env = typeof window == 'object' ? window : self;
+    console.log(self.indexedDB);
+    var env = typeof window == 'object' ? window : this;
     this.idb = env.indexedDB || env.webkitIndexedDB || env.mozIndexedDB;
     this.keyRange = env.IDBKeyRange || env.webkitIDBKeyRange || env.mozIDBKeyRange;
 
@@ -9462,7 +9436,7 @@ function extend() {
      *
      */
     openDB: function () {
-
+      //console.log(this.idb);
       var openRequest = this.idb.open(this.dbName, this.dbVersion);
       var preventSuccessCallback = false;
 
@@ -9698,7 +9672,7 @@ function extend() {
 
       var hasSuccess = false,
           result = null;
-      
+
       var getTransaction = this.db.transaction([this.storeName], this.consts.READ_ONLY);
       getTransaction.oncomplete = function () {
         var callback = hasSuccess ? onSuccess : onError;
@@ -9776,7 +9750,7 @@ function extend() {
       };
       batchTransaction.onabort = onError;
       batchTransaction.onerror = onError;
-      
+
       var count = dataArray.length;
       var called = false;
       var hasSuccess = false;
@@ -10427,7 +10401,7 @@ function extend() {
 
 }, this);
 
-},{}],77:[function(require,module,exports){
+},{}],78:[function(require,module,exports){
 var Buffer = require('buffer').Buffer;
 
 module.exports = isBuffer;
@@ -10437,7 +10411,7 @@ function isBuffer (o) {
     || /\[object (.+Array|Array.+)\]/.test(Object.prototype.toString.call(o));
 }
 
-},{"buffer":115}],78:[function(require,module,exports){
+},{"buffer":115}],79:[function(require,module,exports){
 (function (Buffer){
 
 exports.compare = function (a, b) {
@@ -10586,7 +10560,7 @@ exports.filter = function (range, compare) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":115}],79:[function(require,module,exports){
+},{"buffer":115}],80:[function(require,module,exports){
 (function (Buffer){
 /**
  * Convert a typed array to a Buffer without a copy
@@ -10609,11 +10583,11 @@ module.exports = function (arr) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":115}],80:[function(require,module,exports){
-module.exports=require(56)
-},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/level-sublevel/node_modules/xtend/has-keys.js":56}],81:[function(require,module,exports){
-arguments[4][57][0].apply(exports,arguments)
-},{"./has-keys":80,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/level-sublevel/node_modules/xtend/index.js":57,"object-keys":83}],82:[function(require,module,exports){
+},{"buffer":115}],81:[function(require,module,exports){
+module.exports=require(57)
+},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/level-sublevel/node_modules/xtend/has-keys.js":57}],82:[function(require,module,exports){
+arguments[4][58][0].apply(exports,arguments)
+},{"./has-keys":81,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/level-sublevel/node_modules/xtend/index.js":58,"object-keys":84}],83:[function(require,module,exports){
 var hasOwn = Object.prototype.hasOwnProperty;
 var toString = Object.prototype.toString;
 
@@ -10655,9 +10629,9 @@ module.exports = function forEach(obj, fn) {
 };
 
 
-},{}],83:[function(require,module,exports){
-arguments[4][58][0].apply(exports,arguments)
-},{"./shim":85,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/level-sublevel/node_modules/xtend/node_modules/object-keys/index.js":58}],84:[function(require,module,exports){
+},{}],84:[function(require,module,exports){
+arguments[4][59][0].apply(exports,arguments)
+},{"./shim":86,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/level-sublevel/node_modules/xtend/node_modules/object-keys/index.js":59}],85:[function(require,module,exports){
 var toString = Object.prototype.toString;
 
 module.exports = function isArguments(value) {
@@ -10675,7 +10649,7 @@ module.exports = function isArguments(value) {
 };
 
 
-},{}],85:[function(require,module,exports){
+},{}],86:[function(require,module,exports){
 (function () {
 	"use strict";
 
@@ -10739,7 +10713,7 @@ module.exports = function isArguments(value) {
 }());
 
 
-},{"./foreach":82,"./isArguments":84}],86:[function(require,module,exports){
+},{"./foreach":83,"./isArguments":85}],87:[function(require,module,exports){
 /* Copyright (c) 2012-2014 LevelUP contributors
  * See list at <https://github.com/rvagg/node-levelup#contributing>
  * MIT License
@@ -10819,7 +10793,7 @@ Batch.prototype.write = function (callback) {
 
 module.exports = Batch
 
-},{"./errors":87,"./util":90}],87:[function(require,module,exports){
+},{"./errors":88,"./util":91}],88:[function(require,module,exports){
 /* Copyright (c) 2012-2014 LevelUP contributors
  * See list at <https://github.com/rvagg/node-levelup#contributing>
  * MIT License
@@ -10843,7 +10817,7 @@ module.exports = {
   , EncodingError       : createError('EncodingError', LevelUPError)
 }
 
-},{"errno":98}],88:[function(require,module,exports){
+},{"errno":99}],89:[function(require,module,exports){
 (function (process){
 /* Copyright (c) 2012-2014 LevelUP contributors
  * See list at <https://github.com/rvagg/node-levelup#contributing>
@@ -11282,7 +11256,7 @@ module.exports.destroy = utilStatic('destroy')
 module.exports.repair  = utilStatic('repair')
 
 }).call(this,require('_process'))
-},{"./batch":86,"./errors":87,"./read-stream":89,"./util":90,"./write-stream":91,"_process":123,"deferred-leveldown":93,"events":119,"prr":99,"util":138,"xtend":110}],89:[function(require,module,exports){
+},{"./batch":87,"./errors":88,"./read-stream":90,"./util":91,"./write-stream":92,"_process":123,"deferred-leveldown":94,"events":119,"prr":100,"util":138,"xtend":111}],90:[function(require,module,exports){
 /* Copyright (c) 2012-2014 LevelUP contributors
  * See list at <https://github.com/rvagg/node-levelup#contributing>
  * MIT License <https://github.com/rvagg/node-levelup/blob/master/LICENSE.md>
@@ -11410,7 +11384,7 @@ ReadStream.prototype.toString = function () {
 
 module.exports = ReadStream
 
-},{"./errors":87,"./util":90,"readable-stream":109,"util":138,"xtend":110}],90:[function(require,module,exports){
+},{"./errors":88,"./util":91,"readable-stream":110,"util":138,"xtend":111}],91:[function(require,module,exports){
 (function (process,Buffer){
 /* Copyright (c) 2012-2014 LevelUP contributors
  * See list at <https://github.com/rvagg/node-levelup#contributing>
@@ -11596,7 +11570,7 @@ module.exports = {
 }
 
 }).call(this,require('_process'),require("buffer").Buffer)
-},{"../package.json":111,"./errors":87,"_process":123,"buffer":115,"leveldown":114,"leveldown/package":114,"semver":114,"xtend":110}],91:[function(require,module,exports){
+},{"../package.json":112,"./errors":88,"_process":123,"buffer":115,"leveldown":114,"leveldown/package":114,"semver":114,"xtend":111}],92:[function(require,module,exports){
 (function (process,global){
 /* Copyright (c) 2012-2014 LevelUP contributors
  * See list at <https://github.com/rvagg/node-levelup#contributing>
@@ -11778,7 +11752,7 @@ WriteStream.prototype.toString = function () {
 module.exports = WriteStream
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./util":90,"_process":123,"bl":92,"stream":135,"util":138,"xtend":110}],92:[function(require,module,exports){
+},{"./util":91,"_process":123,"bl":93,"stream":135,"util":138,"xtend":111}],93:[function(require,module,exports){
 (function (Buffer){
 var DuplexStream = require('readable-stream').Duplex
   , util         = require('util')
@@ -11995,7 +11969,7 @@ BufferList.prototype.destroy = function () {
 module.exports = BufferList
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":115,"readable-stream":109,"util":138}],93:[function(require,module,exports){
+},{"buffer":115,"readable-stream":110,"util":138}],94:[function(require,module,exports){
 (function (process,Buffer){
 var util              = require('util')
   , AbstractLevelDOWN = require('abstract-leveldown').AbstractLevelDOWN
@@ -12046,41 +12020,41 @@ DeferredLevelDOWN.prototype._iterator = function () {
 module.exports = DeferredLevelDOWN
 
 }).call(this,require('_process'),require("buffer").Buffer)
-},{"_process":123,"abstract-leveldown":96,"buffer":115,"util":138}],94:[function(require,module,exports){
-module.exports=require(72)
-},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-js/node_modules/abstract-leveldown/abstract-chained-batch.js":72,"_process":123}],95:[function(require,module,exports){
+},{"_process":123,"abstract-leveldown":97,"buffer":115,"util":138}],95:[function(require,module,exports){
 module.exports=require(73)
-},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-js/node_modules/abstract-leveldown/abstract-iterator.js":73,"_process":123}],96:[function(require,module,exports){
+},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-js/node_modules/abstract-leveldown/abstract-chained-batch.js":73,"_process":123}],96:[function(require,module,exports){
 module.exports=require(74)
-},{"./abstract-chained-batch":94,"./abstract-iterator":95,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-js/node_modules/abstract-leveldown/abstract-leveldown.js":74,"_process":123,"buffer":115,"xtend":110}],97:[function(require,module,exports){
-module.exports=require(20)
-},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/errno/custom.js":20,"prr":99}],98:[function(require,module,exports){
-module.exports=require(21)
-},{"./custom":97,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/errno/errno.js":21}],99:[function(require,module,exports){
-module.exports=require(22)
-},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/errno/node_modules/prr/prr.js":22}],100:[function(require,module,exports){
-arguments[4][10][0].apply(exports,arguments)
-},{"./_stream_readable":102,"./_stream_writable":104,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/readable-stream/lib/_stream_duplex.js":10,"_process":123,"core-util-is":105,"inherits":106}],101:[function(require,module,exports){
-arguments[4][11][0].apply(exports,arguments)
-},{"./_stream_transform":103,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/readable-stream/lib/_stream_passthrough.js":11,"core-util-is":105,"inherits":106}],102:[function(require,module,exports){
-module.exports=require(27)
-},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/fwd-stream/node_modules/readable-stream/lib/_stream_readable.js":27,"_process":123,"buffer":115,"core-util-is":105,"events":119,"inherits":106,"isarray":107,"stream":135,"string_decoder/":108}],103:[function(require,module,exports){
-module.exports=require(28)
-},{"./_stream_duplex":100,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/fwd-stream/node_modules/readable-stream/lib/_stream_transform.js":28,"core-util-is":105,"inherits":106}],104:[function(require,module,exports){
-module.exports=require(29)
-},{"./_stream_duplex":100,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/fwd-stream/node_modules/readable-stream/lib/_stream_writable.js":29,"_process":123,"buffer":115,"core-util-is":105,"inherits":106,"stream":135}],105:[function(require,module,exports){
-module.exports=require(15)
-},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/readable-stream/node_modules/core-util-is/lib/util.js":15,"buffer":115}],106:[function(require,module,exports){
-module.exports=require(9)
-},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/inherits/inherits_browser.js":9}],107:[function(require,module,exports){
-module.exports=require(16)
-},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/readable-stream/node_modules/isarray/index.js":16}],108:[function(require,module,exports){
-module.exports=require(17)
-},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/readable-stream/node_modules/string_decoder/index.js":17,"buffer":115}],109:[function(require,module,exports){
-module.exports=require(34)
-},{"./lib/_stream_duplex.js":100,"./lib/_stream_passthrough.js":101,"./lib/_stream_readable.js":102,"./lib/_stream_transform.js":103,"./lib/_stream_writable.js":104,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/fwd-stream/node_modules/readable-stream/readable.js":34,"stream":135}],110:[function(require,module,exports){
+},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-js/node_modules/abstract-leveldown/abstract-iterator.js":74,"_process":123}],97:[function(require,module,exports){
 module.exports=require(75)
-},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-js/node_modules/abstract-leveldown/node_modules/xtend/index.js":75}],111:[function(require,module,exports){
+},{"./abstract-chained-batch":95,"./abstract-iterator":96,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-js/node_modules/abstract-leveldown/abstract-leveldown.js":75,"_process":123,"buffer":115,"xtend":111}],98:[function(require,module,exports){
+module.exports=require(21)
+},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/errno/custom.js":21,"prr":100}],99:[function(require,module,exports){
+module.exports=require(22)
+},{"./custom":98,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/errno/errno.js":22}],100:[function(require,module,exports){
+module.exports=require(23)
+},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/errno/node_modules/prr/prr.js":23}],101:[function(require,module,exports){
+arguments[4][11][0].apply(exports,arguments)
+},{"./_stream_readable":103,"./_stream_writable":105,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/readable-stream/lib/_stream_duplex.js":11,"_process":123,"core-util-is":106,"inherits":107}],102:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"./_stream_transform":104,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/readable-stream/lib/_stream_passthrough.js":12,"core-util-is":106,"inherits":107}],103:[function(require,module,exports){
+module.exports=require(28)
+},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/fwd-stream/node_modules/readable-stream/lib/_stream_readable.js":28,"_process":123,"buffer":115,"core-util-is":106,"events":119,"inherits":107,"isarray":108,"stream":135,"string_decoder/":109}],104:[function(require,module,exports){
+module.exports=require(29)
+},{"./_stream_duplex":101,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/fwd-stream/node_modules/readable-stream/lib/_stream_transform.js":29,"core-util-is":106,"inherits":107}],105:[function(require,module,exports){
+module.exports=require(30)
+},{"./_stream_duplex":101,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/fwd-stream/node_modules/readable-stream/lib/_stream_writable.js":30,"_process":123,"buffer":115,"core-util-is":106,"inherits":107,"stream":135}],106:[function(require,module,exports){
+module.exports=require(16)
+},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/readable-stream/node_modules/core-util-is/lib/util.js":16,"buffer":115}],107:[function(require,module,exports){
+module.exports=require(10)
+},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/inherits/inherits_browser.js":10}],108:[function(require,module,exports){
+module.exports=require(17)
+},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/readable-stream/node_modules/isarray/index.js":17}],109:[function(require,module,exports){
+module.exports=require(18)
+},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/readable-stream/node_modules/string_decoder/index.js":18,"buffer":115}],110:[function(require,module,exports){
+module.exports=require(35)
+},{"./lib/_stream_duplex.js":101,"./lib/_stream_passthrough.js":102,"./lib/_stream_readable.js":103,"./lib/_stream_transform.js":104,"./lib/_stream_writable.js":105,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/fwd-stream/node_modules/readable-stream/readable.js":35,"stream":135}],111:[function(require,module,exports){
+module.exports=require(76)
+},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-js/node_modules/abstract-leveldown/node_modules/xtend/index.js":76}],112:[function(require,module,exports){
 module.exports={
   "name": "levelup",
   "description": "Fast & simple storage - a Node.js-style LevelDB wrapper",
@@ -12231,14 +12205,14 @@ module.exports={
   "_resolved": "https://registry.npmjs.org/levelup/-/levelup-0.18.6.tgz"
 }
 
-},{}],112:[function(require,module,exports){
+},{}],113:[function(require,module,exports){
 var basicOperations = require('./basic_op.js');
 var Exceptions = require('./exceptions.js');
 var helpers = require('./helpers.js');
 var loader = require('./loader.js');
 //Debug
 var util = require('util');
-
+/*
 //A Function that processes(or simulates) an module with given inputs
 //for given time
 //TODO: Generate array of outputs until some time
@@ -12249,7 +12223,7 @@ var util = require('util');
 //...
 //"5":{output}}
 //
-var doProcess = function (object, inputs, resolution) {
+var doProcess = function (object, inputs, resolution, callback) {
   //TODO: Check if object is good.
   console.log("Mod::: "+ object.name);
   console.log(
@@ -12290,15 +12264,123 @@ var doProcess = function (object, inputs, resolution) {
       doProcess(objData, helpers.mapArrayToArrayUsingObj(currVal.inputs, variables));
     }
   });
+  //callback(variables);
   return variables;
+}*/
+
+//module.exports.doProcess = doProcess;
+
+/*function objInternalInstanceConstructor(identifier){
+  this.id = identifier;
+}*/
+
+// function objInternalInstance(identifier){
+//   this.id = identifier;
+// }
+
+// objInternalInstance.returnOutputs = null;
+// objInternalInstance.variables = null ;
+/*var objInteralInstance = {
+
+  constructor: objInternalInstanceConstructor,
+
+  returnOutputs: null,
+  variables: null
+
+};*/
+
+module.exports.doProcess  = function proc (object, inputs, callback){
+  //var currentObjInstance = new objInternalInstance(object.name);
+  var returnOutputs = [];
+  //currentObjInstance.returnWires = {};
+  var variables = helpers.mapMultipleArrayToObj([
+    object.inputs,
+    object.outputs,
+    object.wires
+  ]);
+
+  //parentInstance = parentInstance || false;
+
+  //console.log("Inputs given in " + object.name + " : " +inputs);
+  //console.log("Real Inputs: " + object.inputs)
+  if(inputs.length !== object.inputs.length) {
+    callback(true, {msg:"Input Length Mismatch"});
+  }
+
+  //Assign Inputs to currentObjInstance
+  for (var i = inputs.length - 1; i >= 0; i--) {
+    /*currentObjInstance.*/variables[object.inputs[i]] = inputs[i];
+  };
+
+  var that = this;
+  object.operations.forEach(function (currentValue, index, arr) {
+    //console.log(variables);
+    if (currentValue.type === 'basic') {
+      if(currentValue.outputs.length > 1){
+        var e_msg = parentInstance === false ?
+         "Error in Operation: " + currentValue.instance +
+         "More than one output specified." :
+         "Error in Operation: " + currentValue.instance +
+         "Called From: " + parentInstance.identifier;
+        callback(true, {msg:e_msg});
+      } else {
+        /*currentObjInstance.*/variables[currentValue.outputs[0]] =
+         basicOperations[currentValue.instance](
+          helpers.mapArrayToArrayUsingObj(currentValue.inputs,
+            /*currentObjInstance.*/variables));
+         if(index === arr.length - 1){
+                //console.log(variables);
+                //console.log(variables)
+                callback(false, returnOutputArrayVal(object.outputs, variables));
+        }
+      }
+    } else { /* if not basic */
+      loader.load(currentValue.instance, function (err, data) {
+        if(err){
+          callback(true, {msg:"Cannot Load Module" + currentValue.instance});
+        } else {
+          //Yay! Data
+          //console.log(data);
+          proc(data, helpers.mapArrayToArrayUsingObj(currentValue.inputs,
+            /*currentObjInstance.*/variables),
+            function (error, output) {
+              if(error === true){
+                callback(true, {msg:"Error processing: "+currentValue.instance,
+                 error_details:output});
+              } else {
+                //Yay!
+                //Output returns array?single
+                //if(currentObjInstance.returnOutputs)
+                //console.log("This:" +output);
+                for (var i = currentValue.outputs.length - 1; i >= 0; i--) {
+                  variables[currentValue.outputs[i]] = output[i]
+                };
+                //console.log(currentValue);
+                if(index === arr.length - 1){
+                  //console.log(variables);
+                  //console.log(variables)
+                  callback(false, returnOutputArrayVal(object.outputs, variables));
+                }
+              }
+            });
+        }
+      })
+    }
+  });
 }
 
-module.exports.doProcess = doProcess;
-},{"./basic_op.js":1,"./exceptions.js":2,"./helpers.js":3,"./loader.js":4,"util":138}],113:[function(require,module,exports){
 
-},{}],114:[function(require,module,exports){
-module.exports=require(113)
-},{"/usr/lib/node_modules/browserify/lib/_empty.js":113}],115:[function(require,module,exports){
+function returnOutputArrayVal(objOutputArray, variables){
+  var rO = [];
+  for (var j = objOutputArray.length - 1; j >= 0; j--) {
+    rO[j] = variables[objOutputArray[j]];
+  };
+  return rO;
+}
+
+},{"./basic_op.js":1,"./exceptions.js":3,"./helpers.js":4,"./loader.js":5,"util":138}],114:[function(require,module,exports){
+
+},{}],115:[function(require,module,exports){
 /*!
  * The buffer module from node.js, for the browser.
  *
@@ -13899,10 +13981,10 @@ function isUndefined(arg) {
 }
 
 },{}],120:[function(require,module,exports){
-module.exports=require(9)
-},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/inherits/inherits_browser.js":9}],121:[function(require,module,exports){
-module.exports=require(16)
-},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/readable-stream/node_modules/isarray/index.js":16}],122:[function(require,module,exports){
+module.exports=require(10)
+},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/inherits/inherits_browser.js":10}],121:[function(require,module,exports){
+module.exports=require(17)
+},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/readable-stream/node_modules/isarray/index.js":17}],122:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -14219,30 +14301,30 @@ process.chdir = function (dir) {
 };
 
 },{}],124:[function(require,module,exports){
-module.exports=require(24)
-},{"./lib/_stream_duplex.js":125,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/fwd-stream/node_modules/readable-stream/duplex.js":24}],125:[function(require,module,exports){
-arguments[4][10][0].apply(exports,arguments)
-},{"./_stream_readable":127,"./_stream_writable":129,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/readable-stream/lib/_stream_duplex.js":10,"_process":123,"core-util-is":130,"inherits":120}],126:[function(require,module,exports){
+module.exports=require(25)
+},{"./lib/_stream_duplex.js":125,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/fwd-stream/node_modules/readable-stream/duplex.js":25}],125:[function(require,module,exports){
 arguments[4][11][0].apply(exports,arguments)
-},{"./_stream_transform":128,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/readable-stream/lib/_stream_passthrough.js":11,"core-util-is":130,"inherits":120}],127:[function(require,module,exports){
-module.exports=require(27)
-},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/fwd-stream/node_modules/readable-stream/lib/_stream_readable.js":27,"_process":123,"buffer":115,"core-util-is":130,"events":119,"inherits":120,"isarray":121,"stream":135,"string_decoder/":136}],128:[function(require,module,exports){
+},{"./_stream_readable":127,"./_stream_writable":129,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/readable-stream/lib/_stream_duplex.js":11,"_process":123,"core-util-is":130,"inherits":120}],126:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"./_stream_transform":128,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/readable-stream/lib/_stream_passthrough.js":12,"core-util-is":130,"inherits":120}],127:[function(require,module,exports){
 module.exports=require(28)
-},{"./_stream_duplex":125,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/fwd-stream/node_modules/readable-stream/lib/_stream_transform.js":28,"core-util-is":130,"inherits":120}],129:[function(require,module,exports){
+},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/fwd-stream/node_modules/readable-stream/lib/_stream_readable.js":28,"_process":123,"buffer":115,"core-util-is":130,"events":119,"inherits":120,"isarray":121,"stream":135,"string_decoder/":136}],128:[function(require,module,exports){
 module.exports=require(29)
-},{"./_stream_duplex":125,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/fwd-stream/node_modules/readable-stream/lib/_stream_writable.js":29,"_process":123,"buffer":115,"core-util-is":130,"inherits":120,"stream":135}],130:[function(require,module,exports){
-module.exports=require(15)
-},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/readable-stream/node_modules/core-util-is/lib/util.js":15,"buffer":115}],131:[function(require,module,exports){
+},{"./_stream_duplex":125,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/fwd-stream/node_modules/readable-stream/lib/_stream_transform.js":29,"core-util-is":130,"inherits":120}],129:[function(require,module,exports){
+module.exports=require(30)
+},{"./_stream_duplex":125,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/fwd-stream/node_modules/readable-stream/lib/_stream_writable.js":30,"_process":123,"buffer":115,"core-util-is":130,"inherits":120,"stream":135}],130:[function(require,module,exports){
+module.exports=require(16)
+},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/readable-stream/node_modules/core-util-is/lib/util.js":16,"buffer":115}],131:[function(require,module,exports){
 module.exports = require("./lib/_stream_passthrough.js")
 
 },{"./lib/_stream_passthrough.js":126}],132:[function(require,module,exports){
-module.exports=require(34)
-},{"./lib/_stream_duplex.js":125,"./lib/_stream_passthrough.js":126,"./lib/_stream_readable.js":127,"./lib/_stream_transform.js":128,"./lib/_stream_writable.js":129,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/fwd-stream/node_modules/readable-stream/readable.js":34,"stream":135}],133:[function(require,module,exports){
+module.exports=require(35)
+},{"./lib/_stream_duplex.js":125,"./lib/_stream_passthrough.js":126,"./lib/_stream_readable.js":127,"./lib/_stream_transform.js":128,"./lib/_stream_writable.js":129,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/fwd-stream/node_modules/readable-stream/readable.js":35,"stream":135}],133:[function(require,module,exports){
 module.exports = require("./lib/_stream_transform.js")
 
 },{"./lib/_stream_transform.js":128}],134:[function(require,module,exports){
-module.exports=require(35)
-},{"./lib/_stream_writable.js":129,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/fwd-stream/node_modules/readable-stream/writable.js":35}],135:[function(require,module,exports){
+module.exports=require(36)
+},{"./lib/_stream_writable.js":129,"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/fwd-stream/node_modules/readable-stream/writable.js":36}],135:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -14372,8 +14454,8 @@ Stream.prototype.pipe = function(dest, options) {
 };
 
 },{"events":119,"inherits":120,"readable-stream/duplex.js":124,"readable-stream/passthrough.js":131,"readable-stream/readable.js":132,"readable-stream/transform.js":133,"readable-stream/writable.js":134}],136:[function(require,module,exports){
-module.exports=require(17)
-},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/readable-stream/node_modules/string_decoder/index.js":17,"buffer":115}],137:[function(require,module,exports){
+module.exports=require(18)
+},{"/home/cparch/codes/logicsim-js/src/node_modules/browserify-fs/node_modules/level-filesystem/node_modules/concat-stream/node_modules/readable-stream/node_modules/string_decoder/index.js":18,"buffer":115}],137:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
@@ -14970,11 +15052,5 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":137,"_process":123,"inherits":120}],"browserify-fs":[function(require,module,exports){
-var leveljs = require('level-js');
-var levelup = require('levelup');
-var fs = require('level-filesystem');
-
-var db = levelup('level-filesystem', {db:leveljs});
-module.exports = fs(db);
-},{"level-filesystem":7,"level-js":70,"levelup":88}]},{},[5]);
+},{"./support/isBuffer":137,"_process":123,"inherits":120}]},{},[2])(2)
+});
