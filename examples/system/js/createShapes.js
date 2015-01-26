@@ -39,7 +39,7 @@ iCreate.onclick = function() {
         transparentCorners: false,
         padding: 5,
         shapeType:"input",
-        type: "number",
+        type: "i-number",
         dataType: "input",
         linesIn: 0,
         hasBorders: true
@@ -47,6 +47,14 @@ iCreate.onclick = function() {
     inp.set({
         id: "ip_" + iNum
     });
+    inp.on('editing:entered',function(){
+        onkeydown = function(e){
+            e.preventDefault();
+            if(e.keyCode==48) inp.set("text","0");
+            if(e.keyCode==49) inp.set("text","1");
+            canvas.renderAll();
+        }
+    })
     if (waitingForLine) inp.selectable = false;
     mainInputs["ip_" + iNum] = {
         shape: inp
