@@ -61,6 +61,7 @@ canvas.on('mouse:down', function(o) {
                     getShape = mainInputs;
                 }
                 //Select source of line *
+                curr=o.target.id;
                 getShape[o.target.id].shape.set({
                     "stroke": "#49c",
                     "strokeWidth": 2
