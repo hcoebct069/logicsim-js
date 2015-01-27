@@ -61,7 +61,7 @@ canvas.on('mouse:down', function(o) {
                     getShape = mainInputs;
                 }
                 //Select source of line *
-                curr=o.target.id;
+                curr = o.target.id;
                 getShape[o.target.id].shape.set({
                     "stroke": "#49c",
                     "strokeWidth": 2
@@ -202,50 +202,65 @@ function drawLine(s, d) {
             st = s.shape.top + s.shape.height / 2;
             //Destination
             dl = d.shape.left;
-            dt = d.shape.top + d.shape.height * 0.5;
-            //Shape specific positioning
-            slComp = 0;
-            stComp = 0;
-            dlComp = 0;
-            dtComp = 0;
-            if (s.shape.shapeType == "not") {
-                slComp = -(s.shape.width * 0.15);
+            if (d.shape.shapeType == "not" || d.shape.shapeType == "input") {
+                dt = d.shape.top + d.shape.height * 0.5;
+            } else {
+                if (s.shape.top + s.shape.height/2 < d.shape.top + d.shape.height / 3) {
+                    dtPos = -0.3;
+                } else if (s.shape.top + s.shape.height/2 > d.shape.top + d.shape.height * 2 / 3) {
+                    dtPos = +0.3;
+                } else {
+                    dtPos = 0;
+                }
+                dt = d.shape.top + d.shape.height * (0.5 + dtPos);
             }
-            if (s.shape.shapeType == "or") {
-                slComp = -(s.shape.width * 0.25);
-            }
-            if (d.shape.shapeType == "or") {
-                dlComp = (d.shape.width * 0.25);
-            }
-            if (s.shape.shapeType == "input") {
-                slComp = 7;
-                stComp = 1;
-            }
-            if (d.shape.shapeType == "input") {
-                dlComp = -6;
-                dtComp = 1;
-            }
-            //Positioning the start point of line
-            if ((sl + slComp) > (dl + dlComp)) xl = dl + dlComp;
-            else xl = sl + slComp;
-            if ((st + stComp) > (dt + dtComp)) xt = dt + dtComp;
-            else xt = st + stComp;
-            l = new fabric.Line([sl + slComp, st + stComp, dl + dlComp, dt + dtComp], {
-                stroke: "#666",
-                left: xl,
-                top: xt,
-                selectable: false,
-                id: "ln_" + lNum,
-                dataType: "line",
-                from: s.shape.id,
-                to: d.shape.id,
-                isLine: true
-            })
-            canvas.remove(lines[s.shape.id].to[d.shape.id]);
-            canvas.add(l);
-            lines[s.shape.id].to[d.shape.id] = l;
+        //Shape specific positioning
+        slComp = 0;
+        stComp = 0;
+        dlComp = 0;
+        dtComp = 0;
+        if (s.shape.shapeType == "not") {
+            slComp = -(s.shape.width * 0.15);
         }
+        if (s.shape.shapeType == "or") {
+            slComp = -(s.shape.width * 0.25);
+        }
+        if (d.shape.shapeType == "or") {
+            if(dtPos==0){
+                dlComp = (d.shape.width * 0.25);
+            }else{
+                dlComp = (d.shape.width * 0.16)
+            }
+        }
+        if (s.shape.shapeType == "input") {
+            slComp = 7;
+            stComp = 1;
+        }
+        if (d.shape.shapeType == "input") {
+            dlComp = -6;
+            dtComp = 1;
+        }
+        //Positioning the start point of line
+        if ((sl + slComp) > (dl + dlComp)) xl = dl + dlComp;
+        else xl = sl + slComp;
+        if ((st + stComp) > (dt + dtComp)) xt = dt + dtComp;
+        else xt = st + stComp;
+        l = new fabric.Line([sl + slComp, st + stComp, dl + dlComp, dt + dtComp], {
+            stroke: "#666",
+            left: xl,
+            top: xt,
+            selectable: false,
+            id: "ln_" + lNum,
+            dataType: "line",
+            from: s.shape.id,
+            to: d.shape.id,
+            isLine: true
+        })
+        canvas.remove(lines[s.shape.id].to[d.shape.id]);
+        canvas.add(l);
+        lines[s.shape.id].to[d.shape.id] = l;
     }
+}
 }
 
 function removeAllObjects() {
