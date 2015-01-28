@@ -12,11 +12,11 @@ canvas = new fabric.Canvas("canvas");
 
 window.onload = function() {
     var w = window,
-    d = document,
-    e = d.documentElement,
-    g = d.getElementsByTagName('body')[0],
-    wid = w.innerWidth || e.clientWidth || g.clientWidth,
-    hei = w.innerHeight || e.clientHeight || g.clientHeight;
+        d = document,
+        e = d.documentElement,
+        g = d.getElementsByTagName('body')[0],
+        wid = w.innerWidth || e.clientWidth || g.clientWidth,
+        hei = w.innerHeight || e.clientHeight || g.clientHeight;
 
     var header = document.getElementsByTagName('header')[0];
     var head_h = header.offsetHeight;
@@ -191,11 +191,13 @@ function renderLines() {
             drawLine(source, destination);
         }
     }
+    compile();
 }
 
 function drawLine(s, d) {
     if (s.hasOwnProperty("shape") && d.hasOwnProperty("shape")) {
         if (s.shape.id != d.shape.id) {
+            d.shape.input[s.shape.id] = s.shape.output;
             //Shape general positioning
             //Source
             sl = s.shape.left + s.shape.width;
@@ -205,62 +207,62 @@ function drawLine(s, d) {
             if (d.shape.shapeType == "not" || d.shape.shapeType == "input") {
                 dt = d.shape.top + d.shape.height * 0.5;
             } else {
-                if (s.shape.top + s.shape.height/2 < d.shape.top + d.shape.height / 3) {
+                if (s.shape.top + s.shape.height / 2 < d.shape.top + d.shape.height / 3) {
                     dtPos = -0.3;
-                } else if (s.shape.top + s.shape.height/2 > d.shape.top + d.shape.height * 2 / 3) {
+                } else if (s.shape.top + s.shape.height / 2 > d.shape.top + d.shape.height * 2 / 3) {
                     dtPos = +0.3;
                 } else {
                     dtPos = 0;
                 }
                 dt = d.shape.top + d.shape.height * (0.5 + dtPos);
             }
-        //Shape specific positioning
-        slComp = 0;
-        stComp = 0;
-        dlComp = 0;
-        dtComp = 0;
-        if (s.shape.shapeType == "not") {
-            slComp = -(s.shape.width * 0.15);
-        }
-        if (s.shape.shapeType == "or") {
-            slComp = -(s.shape.width * 0.25);
-        }
-        if (d.shape.shapeType == "or") {
-            if(dtPos==0){
-                dlComp = (d.shape.width * 0.25);
-            }else{
-                dlComp = (d.shape.width * 0.16)
+            //Shape specific positioning
+            slComp = 0;
+            stComp = 0;
+            dlComp = 0;
+            dtComp = 0;
+            if (s.shape.shapeType == "not") {
+                slComp = -(s.shape.width * 0.15);
             }
+            if (s.shape.shapeType == "or") {
+                slComp = -(s.shape.width * 0.25);
+            }
+            if (d.shape.shapeType == "or") {
+                if (dtPos == 0) {
+                    dlComp = (d.shape.width * 0.25);
+                } else {
+                    dlComp = (d.shape.width * 0.16)
+                }
+            }
+            if (s.shape.shapeType == "input") {
+                slComp = 7;
+                stComp = 1;
+            }
+            if (d.shape.shapeType == "input") {
+                dlComp = -6;
+                dtComp = 1;
+            }
+            //Positioning the start point of line
+            if ((sl + slComp) > (dl + dlComp)) xl = dl + dlComp;
+            else xl = sl + slComp;
+            if ((st + stComp) > (dt + dtComp)) xt = dt + dtComp;
+            else xt = st + stComp;
+            l = new fabric.Line([sl + slComp, st + stComp, dl + dlComp, dt + dtComp], {
+                stroke: "#666",
+                left: xl,
+                top: xt,
+                selectable: false,
+                id: "ln_" + lNum,
+                dataType: "line",
+                from: s.shape.id,
+                to: d.shape.id,
+                isLine: true
+            })
+            canvas.remove(lines[s.shape.id].to[d.shape.id]);
+            canvas.add(l);
+            lines[s.shape.id].to[d.shape.id] = l;
         }
-        if (s.shape.shapeType == "input") {
-            slComp = 7;
-            stComp = 1;
-        }
-        if (d.shape.shapeType == "input") {
-            dlComp = -6;
-            dtComp = 1;
-        }
-        //Positioning the start point of line
-        if ((sl + slComp) > (dl + dlComp)) xl = dl + dlComp;
-        else xl = sl + slComp;
-        if ((st + stComp) > (dt + dtComp)) xt = dt + dtComp;
-        else xt = st + stComp;
-        l = new fabric.Line([sl + slComp, st + stComp, dl + dlComp, dt + dtComp], {
-            stroke: "#666",
-            left: xl,
-            top: xt,
-            selectable: false,
-            id: "ln_" + lNum,
-            dataType: "line",
-            from: s.shape.id,
-            to: d.shape.id,
-            isLine: true
-        })
-        canvas.remove(lines[s.shape.id].to[d.shape.id]);
-        canvas.add(l);
-        lines[s.shape.id].to[d.shape.id] = l;
     }
-}
 }
 
 function removeAllObjects() {
@@ -270,4 +272,57 @@ function removeAllObjects() {
     canvas.forEachObject(function(o) {
         canvas.remove(o);
     })
+}
+
+function compile() {
+    op = 0;
+    for (i in mainShapes) {
+        //console.log(mainShapes[i].shape.input);
+        for (d in mainShapes[i].shape.input) {
+            if (mainShapes.hasOwnProperty(d)) {
+                gShape = mainShapes;
+            } else {
+                gShape = mainInputs;
+            }
+            mainShapes[i].shape.input[d] = gShape[d].shape.output;
+        }
+        if (mainShapes[i].shape.shapeType == "and") {
+            mainShapes[i].shape.output = 1;
+            for (var da in mainShapes[i].shape.input) {
+                if (mainShapes[i].shape.input[da] == 0) {
+                    mainShapes[i].shape.output = 0;
+                    break;
+                }
+            }
+        }
+        if (mainShapes[i].shape.shapeType == "or") {
+            mainShapes[i].shape.output = 0;
+            for (var da in mainShapes[i].shape.input) {
+                if (mainShapes[i].shape.input[da] == 1) {
+                    mainShapes[i].shape.output = 1;
+                    break;
+                }
+            }
+        }
+        if (mainShapes[i].shape.shapeType == "not") {
+            for (var da in mainShapes[i].shape.input) {
+                if (mainShapes[i].shape.input[da] == 0) {
+                    mainShapes[i].shape.output = 1;
+                } else {
+                    mainShapes[i].shape.output = 0;
+                }
+            }
+        }
+        op = (mainShapes[i].shape.output);
+        if(lines.hasOwnProperty(i)){
+            for(z in lines[i].to){
+                if(mainInputs.hasOwnProperty(z)){
+                    //console.log(z)
+                    mainInputs[z].shape.set("text",op.toString());
+                    canvas.renderAll();
+                }
+            }
+        }
+    }
+    return (op);
 }

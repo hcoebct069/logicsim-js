@@ -10,13 +10,16 @@ function shapeAnd(id, x, y, size) {
         height: 100,
         top: y,
         left: x,
-        shapeType:"and",
+        shapeType: "and",
         hasControls: false,
         scaleX: size / 50,
         scaleY: size / 50,
         dataType: "shape",
         linesIn: 0,
-        hasBorders: false
+        hasBorders: false,
+        outputObj: {},
+        output: 0,
+        input: {}
     })
     if (waitingForLine) andShape.selectable = false;
     canvas.add(andShape);
@@ -37,13 +40,16 @@ function shapeOr(id, x, y, size) {
         height: 100,
         top: y,
         left: x,
-        shapeType:"or",
+        shapeType: "or",
         hasControls: false,
         scaleX: size / 50,
         scaleY: size / 50,
         dataType: "shape",
         linesIn: 0,
-        hasBorders: false
+        hasBorders: false,
+        outputObj: {},
+        output: 0,
+        input: {}
     })
     if (waitingForLine) orShape.selectable = false;
     canvas.add(orShape);
@@ -64,13 +70,16 @@ function shapeNot(id, x, y, size) {
         height: 100,
         top: y,
         left: x,
-        shapeType:"not",
+        shapeType: "not",
         hasControls: false,
         scaleX: size / 50,
         scaleY: size / 50,
         dataType: "shape",
         linesIn: 0,
-        hasBorders: false
+        hasBorders: false,
+        outputObj: {},
+        output: 0,
+        input: {}
     })
     if (waitingForLine) notShape.selectable = false;
     canvas.add(notShape);
