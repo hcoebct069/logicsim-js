@@ -6,7 +6,7 @@ var loader = require('./loader.js');
 var util = require('util');
 /*
 //A Function that processes(or simulates) an module with given inputs
-//for given time
+//[for given time]
 //TODO: Generate array of outputs until some time
 //Example: If the maximum delay is 5s, then given
 //resolution of 1s. Give the outputs for each second
