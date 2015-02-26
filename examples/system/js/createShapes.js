@@ -38,20 +38,29 @@ iCreate.onclick = function() {
         hasControls: false,
         transparentCorners: false,
         padding: 5,
-        shapeType:"input",
+        shapeType: "input",
         type: "i-number",
         dataType: "input",
         linesIn: 0,
-        hasBorders: true
+        hasBorders: true,
+        outputObj: {},
+        output: 0,
+        input: {}
     });
     inp.set({
         id: "ip_" + iNum
     });
-    inp.on('editing:entered',function(){
-        onkeydown = function(e){
+    inp.on('editing:entered', function() {
+        onkeydown = function(e) {
             e.preventDefault();
-            if(e.keyCode==48) inp.set("text","0");
-            if(e.keyCode==49) inp.set("text","1");
+            if (e.keyCode == 48) {
+                inp.set("text", "0");
+                inp.output = 0;
+            }
+            if (e.keyCode == 49) {
+                inp.set("text", "1");
+                inp.output = 1;
+            }
             canvas.renderAll();
         }
     })
@@ -88,6 +97,6 @@ lCreate.onclick = function() {
     }
 }
 
-cClear.onclick=function(){
-	removeAllObjects();
+cClear.onclick = function() {
+    removeAllObjects();
 }

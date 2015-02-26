@@ -12,11 +12,11 @@ canvas = new fabric.Canvas("canvas");
 
 window.onload = function() {
     var w = window,
-    d = document,
-    e = d.documentElement,
-    g = d.getElementsByTagName('body')[0],
-    wid = w.innerWidth || e.clientWidth || g.clientWidth,
-    hei = w.innerHeight || e.clientHeight || g.clientHeight;
+        d = document,
+        e = d.documentElement,
+        g = d.getElementsByTagName('body')[0],
+        wid = w.innerWidth || e.clientWidth || g.clientWidth,
+        hei = w.innerHeight || e.clientHeight || g.clientHeight;
 
     var header = document.getElementsByTagName('header')[0];
     var head_h = header.offsetHeight;
@@ -61,7 +61,7 @@ canvas.on('mouse:down', function(o) {
                     getShape = mainInputs;
                 }
                 //Select source of line *
-                curr=o.target.id;
+                curr = o.target.id;
                 getShape[o.target.id].shape.set({
                     "stroke": "#49c",
                     "strokeWidth": 2
@@ -191,18 +191,31 @@ function renderLines() {
             drawLine(source, destination);
         }
     }
+    compile();
 }
 
 function drawLine(s, d) {
     if (s.hasOwnProperty("shape") && d.hasOwnProperty("shape")) {
         if (s.shape.id != d.shape.id) {
+            d.shape.input[s.shape.id] = s.shape.output;
             //Shape general positioning
             //Source
             sl = s.shape.left + s.shape.width;
             st = s.shape.top + s.shape.height / 2;
             //Destination
             dl = d.shape.left;
-            dt = d.shape.top + d.shape.height * 0.5;
+            if (d.shape.shapeType == "not" || d.shape.shapeType == "input") {
+                dt = d.shape.top + d.shape.height * 0.5;
+            } else {
+                if (s.shape.top + s.shape.height / 2 < d.shape.top + d.shape.height / 3) {
+                    dtPos = -0.3;
+                } else if (s.shape.top + s.shape.height / 2 > d.shape.top + d.shape.height * 2 / 3) {
+                    dtPos = +0.3;
+                } else {
+                    dtPos = 0;
+                }
+                dt = d.shape.top + d.shape.height * (0.5 + dtPos);
+            }
             //Shape specific positioning
             slComp = 0;
             stComp = 0;
@@ -215,7 +228,11 @@ function drawLine(s, d) {
                 slComp = -(s.shape.width * 0.25);
             }
             if (d.shape.shapeType == "or") {
-                dlComp = (d.shape.width * 0.25);
+                if (dtPos == 0) {
+                    dlComp = (d.shape.width * 0.25);
+                } else {
+                    dlComp = (d.shape.width * 0.16)
+                }
             }
             if (s.shape.shapeType == "input") {
                 slComp = 7;
@@ -255,4 +272,57 @@ function removeAllObjects() {
     canvas.forEachObject(function(o) {
         canvas.remove(o);
     })
+}
+
+function compile() {
+    op = 0;
+    for (i in mainShapes) {
+        //console.log(mainShapes[i].shape.input);
+        for (d in mainShapes[i].shape.input) {
+            if (mainShapes.hasOwnProperty(d)) {
+                gShape = mainShapes;
+            } else {
+                gShape = mainInputs;
+            }
+            mainShapes[i].shape.input[d] = gShape[d].shape.output;
+        }
+        if (mainShapes[i].shape.shapeType == "and") {
+            mainShapes[i].shape.output = 1;
+            for (var da in mainShapes[i].shape.input) {
+                if (mainShapes[i].shape.input[da] == 0) {
+                    mainShapes[i].shape.output = 0;
+                    break;
+                }
+            }
+        }
+        if (mainShapes[i].shape.shapeType == "or") {
+            mainShapes[i].shape.output = 0;
+            for (var da in mainShapes[i].shape.input) {
+                if (mainShapes[i].shape.input[da] == 1) {
+                    mainShapes[i].shape.output = 1;
+                    break;
+                }
+            }
+        }
+        if (mainShapes[i].shape.shapeType == "not") {
+            for (var da in mainShapes[i].shape.input) {
+                if (mainShapes[i].shape.input[da] == 0) {
+                    mainShapes[i].shape.output = 1;
+                } else {
+                    mainShapes[i].shape.output = 0;
+                }
+            }
+        }
+        op = (mainShapes[i].shape.output);
+        if(lines.hasOwnProperty(i)){
+            for(z in lines[i].to){
+                if(mainInputs.hasOwnProperty(z)){
+                    //console.log(z)
+                    mainInputs[z].shape.set("text",op.toString());
+                    canvas.renderAll();
+                }
+            }
+        }
+    }
+    return (op);
 }
